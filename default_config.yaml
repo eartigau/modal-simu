@@ -1,0 +1,10 @@
+# Modal noise simulator — default configuration
+# All values can be overridden by passing params= to generate_spectrum()
+# or by pointing to a custom YAML file.
+
+wavelength_start_nm: 1000.0   # start of wavelength range [nm]
+wavelength_end_nm:   1800.0   # end of wavelength range   [nm]
+velocity_step_kms:   1.0      # pixel spacing in velocity  [km/s]
+kernel_width_kms:    3.5      # GP correlation length      [km/s]
+amplitude_at_1650nm: 0.006    # GP amplitude at 1650 nm   (fractional flux)
+white_noise:         0.005    # white noise std per pixel  (fractional flux)

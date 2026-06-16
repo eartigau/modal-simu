@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modal Noise Simulator</title>
+  <script>
+    (function () {
+      var lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      var html = document.documentElement;
+      if (lang.startsWith('fr')) {
+        html.setAttribute('lang', 'fr');
+        html.classList.add('lang-fr');
+      } else {
+        html.setAttribute('lang', 'en');
+        html.classList.add('lang-en');
+      }
+    })();
+
+    function toggleLang() {
+      var html = document.documentElement;
+      if (html.classList.contains('lang-fr')) {
+        html.classList.replace('lang-fr', 'lang-en');
+        html.setAttribute('lang', 'en');
+      } else {
+        html.classList.replace('lang-en', 'lang-fr');
+        html.setAttribute('lang', 'fr');
+      }
+      document.getElementById('langBtn').textContent =
+        html.classList.contains('lang-fr') ? 'EN' : 'FR';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('langBtn').textContent =
+        document.documentElement.classList.contains('lang-fr') ? 'EN' : 'FR';
+    });
+  </script>
+  <style>
+    :root {
+      --blue:   #1a4f7a;
+      --blue2:  #2980b9;
+      --bg:     #f7f9fc;
+      --card:   #ffffff;
+      --border: #d0dce8;
+      --text:   #1c2b3a;
+      --muted:  #5a6e80;
+      --code-bg:#eef3f8;
+      --accent: #e67e22;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ── lang visibility ── */
+    html.lang-en .fr { display: none; }
+    html.lang-fr .en { display: none; }
+
+    /* ── nav ── */
+    nav {
+      background: var(--blue);
+      color: #fff;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    .nav-brand {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .nav-right { display: flex; align-items: center; gap: 1.2rem; }
+    nav a { color: rgba(255,255,255,.82); text-decoration: none; font-size: .9rem; }
+    nav a:hover { color: #fff; }
+    #langBtn {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.4);
+      color: #fff;
+      padding: .3rem .8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+    #langBtn:hover { background: rgba(255,255,255,.28); }
+
+    /* ── hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--blue) 0%, #2471a3 100%);
+      color: #fff;
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+    }
+    .hero h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: .6rem; }
+    .hero p  { font-size: 1.1rem; opacity: .88; max-width: 640px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      margin-top: 1.4rem;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px;
+      padding: .35rem 1rem;
+      font-size: .82rem;
+      letter-spacing: .04em;
+    }
+
+    /* ── main layout ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--blue);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: .4rem;
+      margin-bottom: 1.2rem;
+    }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.2rem 0 .5rem; color: var(--blue); }
+    p  { margin-bottom: .85rem; }
+
+    /* ── cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    /* ── code blocks ── */
+    pre, code {
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      font-size: .875rem;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    code { background: var(--code-bg); padding: .1em .35em; border-radius: 3px; }
+
+    /* ── parameter table ── */
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th {
+      background: var(--blue);
+      color: #fff;
+      text-align: left;
+      padding: .55rem .8rem;
+      font-weight: 600;
+    }
+    td { padding: .5rem .8rem; border-bottom: 1px solid var(--border); }
+    tr:nth-child(even) td { background: #f0f5fa; }
+    td:first-child { font-family: 'Fira Mono', monospace; font-size: .82rem; color: var(--blue2); }
+    td:last-child  { color: var(--muted); font-size: .85rem; }
+
+    /* ── figures ── */
+    .fig-wrap { margin: 1.4rem 0; }
+    .fig-wrap img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .fig-caption {
+      font-size: .82rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: .5rem;
+    }
+
+    /* ── install steps ── */
+    .steps { counter-reset: step; }
+    .step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+    .step-num {
+      counter-increment: step;
+      background: var(--blue2);
+      color: #fff;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700;
+      flex-shrink: 0;
+      margin-top: .15rem;
+    }
+    .step-num::before { content: counter(step); }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--blue2); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">Modal Noise Simulator</span>
+  <div class="nav-right">
+    <a href="https://eartigau.github.io/" class="en">← Back to homepage</a>
+    <a href="https://eartigau.github.io/" class="fr">← Retour à l'accueil</a>
+    <a href="https://github.com/eartigau/modal-simu">GitHub</a>
+    <button id="langBtn" onclick="toggleLang()">FR</button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <h1 class="en">Modal Noise Simulator</h1>
+  <h1 class="fr">Simulateur de bruit de mode</h1>
+  <p class="en">
+    A lightweight Python tool to generate synthetic modal-noise spectra
+    for fibre-fed astronomical spectrographs.
+  </p>
+  <p class="fr">
+    Un outil Python léger pour générer des spectres synthétiques de bruit de mode
+    pour les spectrographes astronomiques à fibre optique.
+  </p>
+  <span class="badge">Python · NumPy · SciPy · YAML</span>
+</div>
+
+<main>
+
+<!-- ── WHAT IS MODAL NOISE ── -->
+<section>
+  <h2 class="en">What is modal noise?</h2>
+  <h2 class="fr">Qu'est-ce que le bruit de mode?</h2>
+
+  <p class="en">
+    Optical fibres used in high-resolution spectrographs support a finite number of
+    propagation modes. The interference pattern between these modes creates a
+    wavelength-correlated "speckle" structure superimposed on the stellar spectrum —
+    known as <strong>modal noise</strong>. Unlike photon or read noise, modal noise
+    is <em>spectrally correlated</em>: nearby wavelengths carry similar errors.
+  </p>
+  <p class="fr">
+    Les fibres optiques utilisées dans les spectrographes à haute résolution supportent
+    un nombre fini de modes de propagation. L'interférence entre ces modes crée une
+    structure de type « speckle » corrélée en longueur d'onde, superposée au spectre
+    stellaire — c'est le <strong>bruit de mode</strong>. Contrairement au bruit de photons
+    ou de lecture, le bruit de mode est <em>spectralement corrélé</em> : les longueurs
+    d'onde voisines partagent des erreurs similaires.
+  </p>
+
+  <p class="en">
+    The amplitude of modal noise <strong>grows with wavelength</strong> because the
+    number of modes scales as (D/λ)²: at longer wavelengths fewer modes propagate,
+    increasing the speckle contrast.
+  </p>
+  <p class="fr">
+    L'amplitude du bruit de mode <strong>croît avec la longueur d'onde</strong> car le
+    nombre de modes évolue en (D/λ)² : aux grandes longueurs d'onde, moins de modes
+    se propagent, ce qui augmente le contraste des speckles.
+  </p>
+
+  <div class="fig-wrap">
+    <img src="figures/demo_spectrum.png" alt="Single modal noise realisation"/>
+    <p class="fig-caption en">
+      One simulated spectrum (grey) with the underlying GP modal-noise signal (blue).
+      Bottom panel: the modal-noise component alone, showing increasing amplitude toward the red.
+    </p>
+    <p class="fig-caption fr">
+      Un spectre simulé (gris) avec le signal de bruit de mode GP sous-jacent (bleu).
+      Panneau du bas : la composante de bruit de mode seule, montrant une amplitude croissante vers le rouge.
+    </p>
+  </div>
+</section>
+
+<!-- ── THE MODEL ── -->
+<section>
+  <h2 class="en">The model</h2>
+  <h2 class="fr">Le modèle</h2>
+
+  <p class="en">
+    The simulator draws a single realisation of a <strong>Gaussian Process</strong>
+    with a squared-exponential (RBF) kernel on a uniform log-λ (constant velocity)
+    grid, then applies a wavelength-dependent amplitude envelope and adds independent
+    white noise:
+  </p>
+  <p class="fr">
+    Le simulateur tire une réalisation unique d'un <strong>processus gaussien</strong>
+    avec un noyau exponentiel carré (RBF) sur une grille log-λ uniforme (vitesse constante),
+    puis applique une enveloppe d'amplitude dépendante de la longueur d'onde et ajoute
+    un bruit blanc indépendant :
+  </p>
+
+  <div class="card">
+    <p style="font-family:monospace; text-align:center; font-size:1rem; padding:.4rem 0;">
+      S(λ) &nbsp;=&nbsp; 1 &nbsp;+&nbsp; GP(0, K) &times; A<sub>1650</sub> &times; (λ/1650)
+      &nbsp;+&nbsp; 𝒩(0, σ<sub>n</sub>²)
+    </p>
+  </div>
+
+  <p class="en">
+    The GP kernel width (correlation length) controls how rapidly the modal noise
+    varies in velocity space. A typical fibre-fed spectrograph shows correlation
+    lengths of a few to tens of km/s.
+  </p>
+  <p class="fr">
+    La largeur du noyau GP (longueur de corrélation) contrôle la rapidité de variation
+    du bruit de mode dans l'espace des vitesses. Un spectrographe à fibre typique présente
+    des longueurs de corrélation de quelques dizaines de km/s.
+  </p>
+
+  <div class="fig-wrap">
+    <img src="figures/demo_amplitude.png" alt="Amplitude envelope vs wavelength"/>
+    <p class="fig-caption en">
+      Empirical RMS of the modal noise over 50 realisations (blue) vs. the analytical
+      amplitude model A₁₆₅₀ × λ/1650 (red dashed).
+    </p>
+    <p class="fig-caption fr">
+      RMS empirique du bruit de mode sur 50 réalisations (bleu) comparé au modèle
+      analytique A₁₆₅₀ × λ/1650 (rouge pointillé).
+    </p>
+  </div>
+
+  <div class="fig-wrap">
+    <img src="figures/demo_realizations.png" alt="Five independent realisations"/>
+    <p class="fig-caption en">
+      Five independent realisations drawn with the same kernel parameters.
+      Each represents a distinct modal-noise pattern as would be observed
+      between different fibre agitation states.
+    </p>
+    <p class="fig-caption fr">
+      Cinq réalisations indépendantes tirées avec les mêmes paramètres de noyau.
+      Chacune représente un patron de bruit de mode distinct, tel qu'observé entre
+      différents états d'agitation de la fibre.
+    </p>
+  </div>
+</section>
+
+<!-- ── INSTALLATION ── -->
+<section>
+  <h2 class="en">Installation</h2>
+  <h2 class="fr">Installation</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div>
+        <p class="en"><strong>Clone the repository</strong></p>
+        <p class="fr"><strong>Cloner le dépôt</strong></p>
+        <pre>git clone https://github.com/eartigau/modal-simu.git
+cd modal-simu</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div>
+        <p class="en"><strong>Install dependencies</strong> (standard scientific Python stack)</p>
+        <p class="fr"><strong>Installer les dépendances</strong> (pile Python scientifique standard)</p>
+        <pre>pip install numpy scipy matplotlib pyyaml</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div>
+        <p class="en"><strong>Run the demo</strong></p>
+        <p class="fr"><strong>Lancer la démo</strong></p>
+        <pre>python demo.py</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── USAGE ── -->
+<section>
+  <h2 class="en">Usage</h2>
+  <h2 class="fr">Utilisation</h2>
+
+  <h3 class="en">Command line</h3>
+  <h3 class="fr">Ligne de commande</h3>
+  <pre><span class="en"># use default config, show plot</span><span class="fr"># config par défaut, afficher le graphe</span>
+python generate_modal_noise.py --plot
+
+<span class="en"># custom config, save to CSV</span><span class="fr"># config personnalisée, sauvegarder en CSV</span>
+python generate_modal_noise.py my_config.yaml --outfile spectrum.csv --seed 42</pre>
+
+  <h3 class="en">As a Python module</h3>
+  <h3 class="fr">En tant que module Python</h3>
+  <pre>from generate_modal_noise import generate_spectrum
+
+<span class="en"># default parameters</span><span class="fr"># paramètres par défaut</span>
+wave, spectrum, gp_signal = generate_spectrum()
+
+<span class="en"># from YAML config</span><span class="fr"># depuis un fichier YAML</span>
+wave, spectrum, gp_signal = generate_spectrum(yaml_file='my_config.yaml', seed=42)
+
+<span class="en"># custom wavelength grid + parameter override</span><span class="fr"># grille de longueurs d'onde personnalisée + paramètre modifié</span>
+import numpy as np
+wave_nm = np.linspace(1450, 1800, 2000)
+wave, spectrum, gp_signal = generate_spectrum(
+    wave_grid=wave_nm,
+    params={'kernel_width_kms': 10, 'amplitude_at_1650nm': 0.01}
+)</pre>
+</section>
+
+<!-- ── PARAMETERS ── -->
+<section>
+  <h2 class="en">Parameters</h2>
+  <h2 class="fr">Paramètres</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="en">YAML key</th>
+        <th class="fr">Clé YAML</th>
+        <th class="en">Default</th>
+        <th class="fr">Défaut</th>
+        <th class="en">Description</th>
+        <th class="fr">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>wavelength_start_nm</td>
+        <td>1000</td>
+        <td class="en">Start of wavelength range [nm]</td>
+        <td class="fr">Début de la plage spectrale [nm]</td>
+      </tr>
+      <tr>
+        <td>wavelength_end_nm</td>
+        <td>1800</td>
+        <td class="en">End of wavelength range [nm]</td>
+        <td class="fr">Fin de la plage spectrale [nm]</td>
+      </tr>
+      <tr>
+        <td>velocity_step_kms</td>
+        <td>1.0</td>
+        <td class="en">Pixel spacing in velocity [km/s]</td>
+        <td class="fr">Pas en vitesse par pixel [km/s]</td>
+      </tr>
+      <tr>
+        <td>kernel_width_kms</td>
+        <td>3.5</td>
+        <td class="en">GP correlation length [km/s] — controls speckle scale</td>
+        <td class="fr">Longueur de corrélation GP [km/s] — contrôle l'échelle des speckles</td>
+      </tr>
+      <tr>
+        <td>amplitude_at_1650nm</td>
+        <td>0.006</td>
+        <td class="en">GP RMS amplitude at 1650 nm (fractional flux)</td>
+        <td class="fr">Amplitude RMS du GP à 1650 nm (flux fractionnaire)</td>
+      </tr>
+      <tr>
+        <td>white_noise</td>
+        <td>0.005</td>
+        <td class="en">White-noise std per pixel (fractional flux)</td>
+        <td class="fr">Écart-type du bruit blanc par pixel (flux fractionnaire)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── DEFAULT YAML ── -->
+<section>
+  <h2 class="en">Default config file</h2>
+  <h2 class="fr">Fichier de configuration par défaut</h2>
+  <pre>
+# default_config.yaml
+wavelength_start_nm: 1000.0   <span class="en"># start of wavelength range [nm]</span><span class="fr"># début de la plage spectrale [nm]</span>
+wavelength_end_nm:   1800.0   <span class="en"># end of wavelength range   [nm]</span><span class="fr"># fin de la plage spectrale [nm]</span>
+velocity_step_kms:   1.0      <span class="en"># pixel spacing in velocity  [km/s]</span><span class="fr"># pas en vitesse par pixel [km/s]</span>
+kernel_width_kms:    3.5      <span class="en"># GP correlation length      [km/s]</span><span class="fr"># longueur de corrélation GP [km/s]</span>
+amplitude_at_1650nm: 0.006    <span class="en"># GP amplitude at 1650 nm</span><span class="fr"># amplitude GP à 1650 nm</span>
+white_noise:         0.005    <span class="en"># per-pixel white noise std</span><span class="fr"># bruit blanc par pixel</span></pre>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    <a href="https://eartigau.github.io/">Étienne Artigau</a> ·
+    <a href="https://exoplanetes.umontreal.ca">iREx, Université de Montréal</a> ·
+    <a href="https://github.com/eartigau/modal-simu">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ Path('figures').mkdir(exist_ok=True)
 
 WAVE_BANDS = {'Y': (960, 1100), 'J': (1150, 1350), 'H': (1450, 1800)}
 COLORS     = ['#2980b9', '#27ae60', '#e67e22', '#8e44ad', '#c0392b']
+C_LIGHT    = 299792.458  # km/s
 
 plt.rcParams.update({'font.size': 11, 'axes.linewidth': 0.8,
                      'xtick.direction': 'in', 'ytick.direction': 'in'})
@@ -23,8 +24,8 @@ fig, axes = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
 wave, spec, gp = generate_spectrum(seed=7)
 
 ax = axes[0]
-ax.plot(wave, spec,      color='0.55', lw=0.35, label='spectrum (GP + noise)')
-ax.plot(wave, 1 + gp,   color='#2980b9', lw=0.8, label='GP modal noise')
+ax.plot(wave, spec,    color='0.55', lw=0.35, label='spectrum (GP + noise)')
+ax.plot(wave, 1 + gp, color='#2980b9', lw=0.8, label='GP modal noise')
 ax.set_ylabel('Normalised flux')
 ax.legend(fontsize=9, loc='upper left')
 ax.set_ylim(0.96, 1.04)
@@ -45,45 +46,52 @@ fig.savefig('figures/demo_spectrum.png', dpi=150, bbox_inches='tight')
 plt.close()
 print('figures/demo_spectrum.png')
 
-# ── figure 2: five realisations overlaid ─────────────────────────────────────
-fig, ax = plt.subplots(figsize=(11, 4))
+# ── figure 2: 3 zoomed regions (5 × kernel_width each), 5 realisations ───────
+kernel_width   = DEFAULTS['kernel_width_kms']
+zoom_kms       = 5 * kernel_width          # total window width in velocity
+zoom_centers   = [1050.0, 1250.0, 1650.0]  # nm  (Y, J, H)
+zoom_labels    = ['Y band  (~1050 nm)', 'J band  (~1250 nm)', 'H band  (~1650 nm)']
 
-for i, seed in enumerate(range(5)):
-    wave, spec, gp = generate_spectrum(seed=seed)
-    ax.plot(wave, spec, color=COLORS[i], lw=0.5, alpha=0.85,
-            label=f'realisation {i+1}')
+# pre-generate 5 realisations
+reals = [generate_spectrum(seed=s) for s in range(5)]
 
-ax.set_xlabel('Wavelength [nm]')
-ax.set_ylabel('Normalised flux')
-ax.legend(fontsize=8, ncol=5, loc='upper center', bbox_to_anchor=(0.5, 1.12))
-ax.set_ylim(0.96, 1.04)
+fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=False)
+
+for ax, center, label in zip(axes, zoom_centers, zoom_labels):
+    # window in wavelength
+    half_lam = center * (zoom_kms / 2) / C_LIGHT
+    lam_lo, lam_hi = center - half_lam, center + half_lam
+
+    for i, (wave, spec, gp) in enumerate(reals):
+        mask = (wave >= lam_lo) & (wave <= lam_hi)
+        # velocity relative to window centre for x-axis
+        vel_rel = (wave[mask] / center - 1) * C_LIGHT
+        ax.plot(vel_rel, spec[mask], color=COLORS[i], lw=1.2, alpha=0.85,
+                label=f'#{i+1}' if ax is axes[0] else None)
+
+    ax.axvline(0, color='k', lw=0.4, ls=':')
+    # mark ±1 kernel width
+    for sign in (-1, 1):
+        ax.axvline(sign * kernel_width, color='0.6', lw=0.6, ls='--')
+
+    ax.set_xlabel('Velocity [km/s]')
+    ax.set_title(label, fontsize=10)
+    ax.set_xlim(-zoom_kms / 2, zoom_kms / 2)
+
+axes[0].set_ylabel('Normalised flux')
+axes[0].legend(fontsize=8, ncol=5, loc='upper center',
+               bbox_to_anchor=(1.65, 1.18), title='realisation')
+
+# shared annotation: kernel width marker
+axes[1].annotate('', xy=(kernel_width, axes[1].get_ylim()[0]),
+                 xytext=(-kernel_width, axes[1].get_ylim()[0]),
+                 arrowprops=dict(arrowstyle='<->', color='0.4', lw=1.0))
+axes[1].text(0, axes[1].get_ylim()[0], f'  2σ = {2*kernel_width:.0f} km/s',
+             va='bottom', ha='center', fontsize=8, color='0.4')
+
 plt.tight_layout()
 fig.savefig('figures/demo_realizations.png', dpi=150, bbox_inches='tight')
 plt.close()
 print('figures/demo_realizations.png')
-
-# ── figure 3: wavelength-dependent amplitude envelope ────────────────────────
-fig, ax = plt.subplots(figsize=(7, 4))
-
-n_real = 50
-wave_ref, _, _ = generate_spectrum(seed=0)
-stds = np.zeros((n_real, len(wave_ref)))
-for i in range(n_real):
-    _, _, gp = generate_spectrum(seed=i)
-    stds[i] = gp
-
-rms_env = np.std(stds, axis=0)
-expected = DEFAULTS['amplitude_at_1650nm'] * (wave_ref / 1650.0)
-
-ax.plot(wave_ref, rms_env, color='#2980b9', lw=1.2, label='empirical RMS (50 draws)')
-ax.plot(wave_ref, expected, color='#e74c3c', lw=1.2, ls='--',
-        label=r'model: $A_{1650}\,\times\,\lambda/1650$')
-ax.set_xlabel('Wavelength [nm]')
-ax.set_ylabel('Modal noise RMS')
-ax.legend(fontsize=9)
-plt.tight_layout()
-fig.savefig('figures/demo_amplitude.png', dpi=150, bbox_inches='tight')
-plt.close()
-print('figures/demo_amplitude.png')
 
 print('\nAll figures written to figures/')

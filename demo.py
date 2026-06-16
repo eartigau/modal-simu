@@ -48,14 +48,14 @@ print('figures/demo_spectrum.png')
 
 # ── figure 2: 3 zoomed regions (5 × kernel_width each), 5 realisations ───────
 kernel_width = DEFAULTS['kernel_width_kms']
-zoom_kms     = 5 * kernel_width           # total window width in velocity
+zoom_kms     = 10 * kernel_width          # total window width in velocity
 zoom_centers = [1050.0, 1250.0, 1650.0]  # nm  (Y, J, H)
 zoom_labels  = ['Y band (~1050 nm)', 'J band (~1250 nm)', 'H band (~1650 nm)']
 
 # pre-generate 5 realisations
 reals = [generate_spectrum(seed=s) for s in range(5)]
 
-fig, axes = plt.subplots(3, 1, figsize=(11, 8), sharex=False)
+fig, axes = plt.subplots(3, 1, figsize=(11, 9), sharex=False)
 
 for ax, center, label in zip(axes, zoom_centers, zoom_labels):
     half_lam = center * (zoom_kms / 2) / C_LIGHT
@@ -64,8 +64,11 @@ for ax, center, label in zip(axes, zoom_centers, zoom_labels):
     for i, (wave, spec, gp) in enumerate(reals):
         mask = (wave >= lam_lo) & (wave <= lam_hi)
         vel_rel = (wave[mask] / center - 1) * C_LIGHT
-        ax.plot(vel_rel, spec[mask], color=COLORS[i], lw=1.5, alpha=0.85,
-                label=f'#{i+1}')
+        # underlying GP (smooth)
+        ax.plot(vel_rel, 1 + gp[mask], color=COLORS[i], lw=2.0, alpha=0.9,
+                label=f'#{i+1}' if ax is axes[0] else None)
+        # white noise on top
+        ax.plot(vel_rel, spec[mask], color=COLORS[i], lw=0.6, alpha=0.45)
 
     for sign in (-1, 1):
         ax.axvline(sign * kernel_width, color='0.6', lw=0.8, ls='--')
@@ -75,15 +78,17 @@ for ax, center, label in zip(axes, zoom_centers, zoom_labels):
     ax.set_ylabel('Normalised flux')
     ax.set_title(label, fontsize=10, loc='left', pad=4)
 
-    # kernel width label on first panel only
     if ax is axes[0]:
-        ybot = ax.get_ylim()[0]
-        ax.annotate('', xy=(kernel_width, ybot), xytext=(-kernel_width, ybot),
-                    arrowprops=dict(arrowstyle='<->', color='0.45', lw=1.0),
-                    annotation_clip=False)
-        ax.text(0, ybot, f' 2σ = {2*kernel_width:.0f} km/s',
-                va='top', ha='center', fontsize=8, color='0.45')
         ax.legend(fontsize=8, ncol=5, loc='upper right', title='realisation')
+
+# kernel width arrow on middle panel
+ax_mid = axes[1]
+ybot = ax_mid.get_ylim()[0]
+ax_mid.annotate('', xy=(kernel_width, ybot), xytext=(-kernel_width, ybot),
+                arrowprops=dict(arrowstyle='<->', color='0.45', lw=1.0),
+                annotation_clip=False)
+ax_mid.text(0, ybot, f' σ = {kernel_width:.1f} km/s',
+            va='top', ha='center', fontsize=8, color='0.45')
 
 axes[-1].set_xlabel('Velocity relative to band centre [km/s]')
 

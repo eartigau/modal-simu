@@ -226,13 +226,13 @@
 <!-- ── HERO ── -->
 <div class="hero">
   <h1 class="en">Modal Noise Simulator</h1>
-  <h1 class="fr">Simulateur de bruit de mode</h1>
+  <h1 class="fr">Simulateur de bruit modal</h1>
   <p class="en">
     A lightweight Python tool to generate synthetic modal-noise spectra
     for fibre-fed astronomical spectrographs.
   </p>
   <p class="fr">
-    Un outil Python léger pour générer des spectres synthétiques de bruit de mode
+    Un outil Python léger pour générer des spectres synthétiques de bruit modal
     pour les spectrographes astronomiques à fibre optique.
   </p>
   <span class="badge">Python · NumPy · SciPy · YAML</span>
@@ -243,7 +243,7 @@
 <!-- ── WHAT IS MODAL NOISE ── -->
 <section>
   <h2 class="en">What is modal noise?</h2>
-  <h2 class="fr">Qu'est-ce que le bruit de mode?</h2>
+  <h2 class="fr">Qu'est-ce que le bruit modal?</h2>
 
   <p class="en">
     Optical fibres used in high-resolution spectrographs support a finite number of
@@ -256,8 +256,8 @@
     Les fibres optiques utilisées dans les spectrographes à haute résolution supportent
     un nombre fini de modes de propagation. L'interférence entre ces modes crée une
     structure de type « speckle » corrélée en longueur d'onde, superposée au spectre
-    stellaire — c'est le <strong>bruit de mode</strong>. Contrairement au bruit de photons
-    ou de lecture, le bruit de mode est <em>spectralement corrélé</em> : les longueurs
+    stellaire — c'est le <strong>bruit modal</strong>. Contrairement au bruit de photons
+    ou de lecture, le bruit modal est <em>spectralement corrélé</em> : les longueurs
     d'onde voisines partagent des erreurs similaires.
   </p>
 
@@ -267,7 +267,7 @@
     increasing the speckle contrast.
   </p>
   <p class="fr">
-    L'amplitude du bruit de mode <strong>croît avec la longueur d'onde</strong> car le
+    L'amplitude du bruit modal <strong>croît avec la longueur d'onde</strong> car le
     nombre de modes évolue en (D/λ)² : aux grandes longueurs d'onde, moins de modes
     se propagent, ce qui augmente le contraste des speckles.
   </p>
@@ -279,8 +279,8 @@
       Bottom panel: the modal-noise component alone, showing increasing amplitude toward the red.
     </p>
     <p class="fig-caption fr">
-      Un spectre simulé (gris) avec le signal de bruit de mode GP sous-jacent (bleu).
-      Panneau du bas : la composante de bruit de mode seule, montrant une amplitude croissante vers le rouge.
+      Un spectre simulé (gris) avec le signal de bruit modal GP sous-jacent (bleu).
+      Panneau du bas : la composante de bruit modal seule, montrant une amplitude croissante vers le rouge.
     </p>
   </div>
 </section>
@@ -317,7 +317,7 @@
   </p>
   <p class="fr">
     La largeur du noyau GP (longueur de corrélation) contrôle la rapidité de variation
-    du bruit de mode dans l'espace des vitesses. Un spectrographe à fibre typique présente
+    du bruit modal dans l'espace des vitesses. Un spectrographe à fibre typique présente
     des longueurs de corrélation de quelques dizaines de km/s.
   </p>
 
@@ -328,7 +328,7 @@
       amplitude model A₁₆₅₀ × λ/1650 (red dashed).
     </p>
     <p class="fig-caption fr">
-      RMS empirique du bruit de mode sur 50 réalisations (bleu) comparé au modèle
+      RMS empirique du bruit modal sur 50 réalisations (bleu) comparé au modèle
       analytique A₁₆₅₀ × λ/1650 (rouge pointillé).
     </p>
   </div>
@@ -342,7 +342,7 @@
     </p>
     <p class="fig-caption fr">
       Cinq réalisations indépendantes tirées avec les mêmes paramètres de noyau.
-      Chacune représente un patron de bruit de mode distinct, tel qu'observé entre
+      Chacune représente un patron de bruit modal distinct, tel qu'observé entre
       différents états d'agitation de la fibre.
     </p>
   </div>

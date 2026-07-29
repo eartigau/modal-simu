@@ -35,22 +35,26 @@
         document.documentElement.classList.contains('lang-fr') ? 'EN' : 'FR';
     });
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --blue:   #1a4f7a;
-      --blue2:  #2980b9;
-      --bg:     #f7f9fc;
-      --card:   #ffffff;
-      --border: #d0dce8;
-      --text:   #1c2b3a;
-      --muted:  #5a6e80;
-      --code-bg:#eef3f8;
-      --accent: #e67e22;
+      --blue:   #0d1a2e;
+      --blue2:  #62c2ff;
+      --bg:     #08111f;
+      --card:   rgba(14, 24, 42, 0.82);
+      --border: rgba(200, 220, 255, 0.16);
+      --text:   #e8eef8;
+      --muted:  #a8b4ca;
+      --code-bg:rgba(4, 8, 16, 0.9);
+      --accent: #62c2ff;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: radial-gradient(1200px 600px at 8% 0%, #14325f 0%, var(--bg) 45%),
+                  linear-gradient(160deg, #0a1424 0%, #111f36 100%);
       color: var(--text);
       line-height: 1.65;
     }
@@ -93,7 +97,7 @@
 
     /* ── hero ── */
     .hero {
-      background: linear-gradient(135deg, var(--blue) 0%, #2471a3 100%);
+      background: linear-gradient(135deg, var(--blue) 0%, #1c3a5e 100%);
       color: #fff;
       text-align: center;
       padding: 4rem 2rem 3rem;
@@ -117,12 +121,12 @@
     h2 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: var(--blue);
+      color: var(--blue2);
       border-bottom: 2px solid var(--border);
       padding-bottom: .4rem;
       margin-bottom: 1.2rem;
     }
-    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.2rem 0 .5rem; color: var(--blue); }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.2rem 0 .5rem; color: var(--blue2); }
     p  { margin-bottom: .85rem; }
 
     /* ── cards ── */
@@ -137,7 +141,7 @@
 
     /* ── code blocks ── */
     pre, code {
-      font-family: 'Fira Mono', 'Consolas', monospace;
+      font-family: 'IBM Plex Mono', 'Consolas', monospace;
       font-size: .875rem;
     }
     pre {
@@ -160,8 +164,8 @@
       font-weight: 600;
     }
     td { padding: .5rem .8rem; border-bottom: 1px solid var(--border); }
-    tr:nth-child(even) td { background: #f0f5fa; }
-    td:first-child { font-family: 'Fira Mono', monospace; font-size: .82rem; color: var(--blue2); }
+    tr:nth-child(even) td { background: rgba(6, 13, 24, 0.5); }
+    td:first-child { font-family: 'IBM Plex Mono', monospace; font-size: .82rem; color: var(--blue2); }
     td:last-child  { color: var(--muted); font-size: .85rem; }
 
     /* ── figures ── */
